@@ -19,11 +19,12 @@ from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.enum.shapes import MSO_SHAPE
 
 ASSETS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets")
-LOGO_COLOR = os.path.join(ASSETS, "nu_med_logo_color.png")   # 854x150
-LOGO_WHITE = os.path.join(ASSETS, "nu_med_logo_white.png")   # 856x84
+EMBLEM_COLOR = os.path.join(ASSETS, "nu_med_emblem_color.png")   # 名大医学部エンブレム(所属名なし)
+EMBLEM_WHITE = os.path.join(ASSETS, "nu_med_emblem_white.png")   # 濃色背景用
 
 # ---- 配色(水色寄りの青を基調、オレンジはアクセントのみ)
-BLUE = RGBColor(0x1F, 0x80, 0xC8)        # 基調色(表紙背景・帯・表ヘッダー)
+BLUE = RGBColor(0x1F, 0x80, 0xC8)        # 基調色(帯・表ヘッダー・区切り線)
+COVER_BLUE = RGBColor(0x0F, 0x4C, 0x81)  # 表紙背景(濃いブルー)
 BLUE_DARK = RGBColor(0x13, 0x5C, 0x96)   # タイトル文字
 LIGHT = RGBColor(0xEA, 0xF4, 0xFC)       # パネル背景
 ORANGE = RGBColor(0xE8, 0x73, 0x1A)      # アクセント(区切り線・強調ボタン)
@@ -183,9 +184,9 @@ def notes(slide, s):
 
 
 def cover(prs, title_lines, affiliation, name, corner=None):
-    """表紙: 青背景、タイトル・所属・氏名は中央揃え、corner(会名・日付)は右上、白ロゴは右下。"""
+    """表紙: 濃いブルー背景、タイトル・所属・氏名は中央揃え、corner(会名・日付)は右上、白ロゴは右下。"""
     s = blank(prs)
-    rect(s, 0, 0, SW, SH, BLUE)
+    rect(s, 0, 0, SW, SH, COVER_BLUE)
     if corner:
         text(s, Inches(7.0), Inches(0.3), Inches(6.0), Inches(0.9), corner, size=18,
              color=SUBTLE, align=PP_ALIGN.RIGHT, space_after=0)
@@ -194,19 +195,18 @@ def cover(prs, title_lines, affiliation, name, corner=None):
     rect(s, Inches(2.5), Inches(4.4), Inches(8.33), Inches(0.07), ORANGE)
     text(s, Inches(0.6), Inches(4.7), Inches(12.13), Inches(1.4),
          [affiliation, [(name, {"size": 32, "bold": True})]], size=24, color=WHITE)
-    w = Inches(4.6)
-    s.shapes.add_picture(LOGO_WHITE, SW - w - Inches(0.35), SH - Inches(0.85), w, int(w * 84 / 856))
+    e = Inches(0.95)
+    s.shapes.add_picture(EMBLEM_WHITE, SW - e - Inches(0.35), SH - e - Inches(0.3), e, e)
     return s
 
 
 def finish(prs, out, skip_first=True):
-    """全スライド(表紙以外)に、右下ロゴ・左下ページ番号を付けて保存。"""
+    """全スライド(表紙以外)に、右下エンブレム・左下ページ番号を付けて保存。"""
     for n, s in enumerate(prs.slides, 1):
         if skip_first and n == 1:
             continue
-        h = Inches(0.42)
-        w = int(h * 854 / 150)
-        s.shapes.add_picture(LOGO_COLOR, SW - w - Inches(0.3), SH - h - Inches(0.12), w, h)
+        e = Inches(0.55)
+        s.shapes.add_picture(EMBLEM_COLOR, SW - e - Inches(0.3), SH - e - Inches(0.1), e, e)
         text(s, Inches(0.3), SH - Inches(0.5), Inches(1.0), Inches(0.35), [str(n)],
              size=SMALL_PT, color=GRAY, align=PP_ALIGN.LEFT)
     prs.save(out)
